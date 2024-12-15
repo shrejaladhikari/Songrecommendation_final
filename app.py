@@ -1,7 +1,5 @@
 from flask import Flask, request, jsonify
 import pickle
-import zipfile  # Import zipfile to handle .zip files
-import os  # To clean up extracted files
 from flask_cors import CORS
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -20,29 +18,12 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 # Pretrained Data
 try:
-    # Extract and load the similarity matrix from a .zip file
-    zip_file_path = 'similarity.zip'  # Path to the .zip file
-    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
-        zip_ref.extract('similarity.pkl')  # Extract similarity.pkl to the current directory
-
-    # Load data
     music = pickle.load(open('df.pkl', 'rb'))  # DataFrame containing song data
     similarity = pickle.load(open('similarity.pkl', 'rb'))  # Similarity matrix
     print("Dataset and similarity matrix loaded successfully!")
     print("First few songs in dataset:", music['song'].head())  # Debugging
-
-    # Clean up extracted similarity.pkl to avoid leaving large files in the directory
-    os.remove('similarity.pkl')
-
-except FileNotFoundError as e:
-    print(f"FileNotFoundError: {e}")
-    print("Make sure 'df.pkl' and 'similarity.zip' are in the same directory as this script.")
-    exit()
-except KeyError:
-    print("Error: similarity.pkl not found in the zip file.")
-    exit()
-except Exception as e:
-    print(f"An unexpected error occurred: {e}")
+except FileNotFoundError:
+    print("Make sure 'df.pkl' and 'similarity.pkl' are in the same directory as this script.")
     exit()
 
 # Root Route
