@@ -3,6 +3,8 @@ import pickle
 from flask_cors import CORS
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+import os
+import requests
 
 # Initialize Flask App
 app = Flask(__name__)
@@ -16,14 +18,31 @@ CLIENT_SECRET = "6947f2eaf19847d6b83f4ab21ae16d9e"
 client_credentials_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
+# Function to download file from Google Drive
+def download_file_from_google_drive(file_id, destination):
+    URL = f"https://drive.google.com/uc?id={file_id}&export=download"
+    session = requests.Session()
+    response = session.get(URL, stream=True)
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(chunk_size=32768):
+            if chunk:
+                f.write(chunk)
+    print(f"File {destination} downloaded successfully!")
+
+# Download similarity.pkl if it doesn't exist
+similarity_file = "similarity.pkl"
+if not os.path.exists(similarity_file):
+    print(f"{similarity_file} not found locally. Downloading from Google Drive...")
+    download_file_from_google_drive("1B4novNjLfMzD6B7UkQL_I9uXWlnKO_Ys", similarity_file)
+
 # Pretrained Data
 try:
     music = pickle.load(open('df.pkl', 'rb'))  # DataFrame containing song data
-    similarity = pickle.load(open('similarity.pkl', 'rb'))  # Similarity matrix
+    similarity = pickle.load(open(similarity_file, 'rb'))  # Similarity matrix
     print("Dataset and similarity matrix loaded successfully!")
     print("First few songs in dataset:", music['song'].head())  # Debugging
 except FileNotFoundError:
-    print("Make sure 'df.pkl' and 'similarity.pkl' are in the same directory as this script.")
+    print("Make sure 'df.pkl' and 'similarity.pkl' are available.")
     exit()
 
 # Root Route
