@@ -15,7 +15,7 @@ const App = () => {
     const fetchSongs = async () => {
       try {
         setLoading(true); // Start loading
-        const response = await fetch("http://127.0.0.1:5000/songs");
+        const response = await fetch("https://songrecommendation-final.onrender.com/songs");
         const data = await response.json();
         setSongList(data.songs);
       } catch (error) {
@@ -38,7 +38,7 @@ const App = () => {
         return;
       }
 
-      const response = await fetch("http://127.0.0.1:5000/recommend", {
+      const response = await fetch("https://songrecommendation-final.onrender.com/recommend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ song: selectedSong }),
